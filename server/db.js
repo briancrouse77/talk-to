@@ -7,13 +7,19 @@ import { mkdirSync } from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const dbPath = process.env.DATABASE_PATH || join(__dirname, '..', 'chat.db');
+let dbPath = process.env.DATABASE_PATH || join(__dirname, '..', 'chat.db');
 
-// Ensure database parent directory exists
+// Ensure database parent directory exists, with local fallback if write permission is denied
 try {
   mkdirSync(dirname(dbPath), { recursive: true });
 } catch (err) {
-  console.warn('Could not create database directory recursively:', err);
+  console.warn(`Could not write to database path "${dbPath}" (${err.message}). Falling back to local database.`);
+  dbPath = join(__dirname, '..', 'chat.db');
+  try {
+    mkdirSync(dirname(dbPath), { recursive: true });
+  } catch (localErr) {
+    console.error('Fatal: Local database path is not writable:', localErr);
+  }
 }
 
 export const db = new Database(dbPath);
