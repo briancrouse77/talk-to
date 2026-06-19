@@ -2,11 +2,21 @@ import Database from 'better-sqlite3';
 import { randomUUID } from 'crypto';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { mkdirSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export const db = new Database(process.env.DATABASE_PATH || join(__dirname, '..', 'chat.db'));
+const dbPath = process.env.DATABASE_PATH || join(__dirname, '..', 'chat.db');
+
+// Ensure database parent directory exists
+try {
+  mkdirSync(dirname(dbPath), { recursive: true });
+} catch (err) {
+  console.warn('Could not create database directory recursively:', err);
+}
+
+export const db = new Database(dbPath);
 
 // Enable WAL mode for better performance
 db.pragma('journal_mode = WAL');
