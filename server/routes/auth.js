@@ -48,7 +48,9 @@ router.post('/register', (req, res) => {
   try {
     userQueries.create.run(id, username, passwordHash, email, verificationToken, username, color, emoji);
 
-    const verifyUrl = `http://localhost:3001/api/auth/verify?token=${verificationToken}`;
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const verifyUrl = `${protocol}://${host}/api/auth/verify?token=${verificationToken}`;
     console.log(`
 ┌────────────────────────────────────────────────────────┐
 │ 📧 MOCK EMAIL SENT                                     │
